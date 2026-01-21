@@ -37,13 +37,13 @@ ui <- fluidPage(
       wellPanel(
         p("Upload Cruise Track (Optional)",style = "font-size: 16px; font-weight: bold; color: #33c1ff;"),
         fileInput("uploadData", "Upload .csv or .tsv file", accept = c(".csv", ".tsv")),
-        p("Must contain columns `StationName`, `Latitude`, `Longitude`, `ShipSpeed`, `TimeOnStation` and `Operations`.")
+        p("Must contain these columns `StationName`, `Latitude`, `Longitude`, `ShipSpeed`, `TimeOnStation` and `Operations`." )
        ),
       
       # Set start date and time zone input
       wellPanel(
         p("Edit Time Information",style = "font-size: 16px; font-weight: bold; color: #33c1ff;"),
-        p("If you did not upload a cruise track, enter the cruise start date and time in the format `YYYY-MM-DDTHH:MM`"),
+        p("Enter the cruise start date and time in the format `YYYY-MM-DDTHH:MM` if the cruise track file doesn't contain that information."),
         textInput("cruiseStartTime", "Cruise Start Time (UTC):", value = format(Sys.time(), "%Y-%m-%dT%H:%M", tz = "UTC")),
         p("Select the time zone for local time"),
         selectInput("timeZoneOffset", "Time Zone (hours):", choices = timezone_sequence, selected = timezone_offset)
@@ -73,8 +73,9 @@ ui <- fluidPage(
       
       # Download button
       wellPanel(
-        p("Download the Cruise Track Table",style = "font-size: 16px; font-weight: bold; color: #33c1ff;"),
-        downloadButton("downloadTable", "Download .csv file") 
+        p("Save the Cruise Track Table",style = "font-size: 16px; font-weight: bold; color: #33c1ff;"),
+        downloadButton("downloadTable", "Download .csv file"),
+        p("This will add to the file the ArrivalUTC, DepartureUTC, ArrivalLocal, DepartureLocal, Distance, and TravelTime columns.")
       )
     ),
     
