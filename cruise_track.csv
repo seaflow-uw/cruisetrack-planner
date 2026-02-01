@@ -1,5 +1,5 @@
 Station,Latitude,Longitude,ShipSpeed,TimeOnStation,ArrivalUTC,DepartureUTC,ArrivalLocal,DepartureLocal,Distance,TravelTime,Operations
-HOME port,13.4333,144.6667,0,0,2024-12-29T03:00,,,,0,0,Departure
+HOME port,13.4333,144.6667,0,0,2024-12-28T22:00,,2024-12-29T08:00,,0,0,Departure
 STN 0,13.245,144.425,6.3,2,,,,,18.06735675,172.0700643,"CTD to 200 m, Zooplankton net tow to 600 m"
 Pt 0,10.702,147.846,10.8,0,,,,,252.070305,1400.390583,turn
 STN 1,10.3242,148.2926,8,1,,,,,34.72624551,260.4468413,CTD to 200 m

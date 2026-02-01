@@ -38,7 +38,7 @@ ui <- fluidPage(
         p("Upload Cruise Track (Optional)",style = "font-size: 16px; font-weight: bold; color: #33c1ff;"),
         fileInput("uploadData", "Upload .csv or .tsv file", accept = c(".csv", ".tsv")),
         p("Must contain these columns `StationName`, `Latitude`, `Longitude`, `ShipSpeed`, `TimeOnStation` and `Operations`." )
-       ),
+      ),
       
       # Set start date and time zone input
       wellPanel(
@@ -316,9 +316,9 @@ server <- function(input, output, session) {
   # output$stationTable <- renderTable({
   #   tableData()
   # })
-
+  
   output$stationTable <- DT::renderDataTable({
-        DT::datatable(tableData(),
+    DT::datatable(tableData(),
                   options = list(
                     pageLength = 30, # Number of rows per page
                     autoWidth = TRUE, # Automatically adjust the width
@@ -334,7 +334,7 @@ server <- function(input, output, session) {
                         width = '700px',     # Set a default width (adjust as needed)
                         targets = 12,    # Apply to all columns
                         whiteSpace = 'nowrap') # Prevent line breaks
-                      ) 
+                    ) 
                   ))
   })
   
@@ -357,6 +357,38 @@ server <- function(input, output, session) {
         if ("ArrivalUTC" %in% names(df) && !is.na(df$ArrivalUTC[1])) {
           arrivalTime <- as.POSIXct(df$ArrivalUTC[1], format = "%Y-%m-%dT%H:%M", tz = "UTC")
           updateTextInput(session, "cruiseStartTime", value = format(arrivalTime, "%Y-%m-%dT%H:%M"))
+        }
+        
+        # Calculate timezone offset from UTC and Local times
+        if ("ArrivalUTC" %in% names(df) && "ArrivalLocal" %in% names(df) && 
+            !is.na(df$ArrivalUTC[1]) && !is.na(df$ArrivalLocal[1]) &&
+            nchar(as.character(df$ArrivalUTC[1])) > 0 && nchar(as.character(df$ArrivalLocal[1])) > 0) {
+          
+          tryCatch({
+            # Extract time strings
+            utc_str <- as.character(df$ArrivalUTC[1])
+            local_str <- as.character(df$ArrivalLocal[1])
+            
+            # Parse both as POSIXct in UTC timezone (we're just using them as numeric values)
+            utc_time <- as.POSIXct(utc_str, format = "%Y-%m-%dT%H:%M", tz = "UTC")
+            local_time <- as.POSIXct(local_str, format = "%Y-%m-%dT%H:%M", tz = "UTC")
+            
+            if (!is.na(utc_time) && !is.na(local_time)) {
+              # Calculate the difference in hours
+              # This represents the timezone offset
+              tz_offset <- round(as.numeric(difftime(utc_time, local_time, units = "hours")))
+              
+              # Handle edge cases for extreme offsets
+              if (tz_offset > 12) tz_offset <- tz_offset - 24
+              if (tz_offset < -12) tz_offset <- tz_offset + 24
+              
+              tz_offset_formatted <- ifelse(tz_offset > 0, paste0("+", tz_offset), as.character(tz_offset))
+              updateSelectInput(session, "timeZoneOffset", selected = tz_offset_formatted)
+            }
+          }, error = function(e) {
+            # If calculation fails, just skip updating timezone
+            message("Could not calculate timezone offset: ", e$message)
+          })
         }
       },
       error = function(e) {
@@ -410,4 +442,4 @@ server <- function(input, output, session) {
 shinyApp(ui = ui, server = server)
 
 # Deploy on shinnyapp.io server
-# rsconnect::deployApp(appName = 'cruisetrackplanner', server = 'shinyapps.io', forceUpdate = TRUE)
+# rsconnect::deployApp(appDir = '~/Documents/Codes/cruisetrack-planner', appName = 'cruisetrackplanner', server = 'shinyapps.io', forceUpdate = TRUE)
